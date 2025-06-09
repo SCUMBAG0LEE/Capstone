@@ -1,6 +1,6 @@
-# App Starter Project with Webpack
+# Signalx
 
-Proyek ini adalah setup dasar untuk aplikasi web yang menggunakan webpack untuk proses bundling, Babel untuk transpile JavaScript, serta mendukung proses build dan serving aplikasi.
+This Project Is A Web Application That Uses Webpack For Bundling, Babel For Transpiling JavaScript, And Also Supports Building And Serving The Application.
 
 ## Table of Contents
 
@@ -12,14 +12,14 @@ Proyek ini adalah setup dasar untuk aplikasi web yang menggunakan webpack untuk 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (disarankan versi 12 atau lebih tinggi)
+- [Node.js](https://nodejs.org/) (Version 12 Or Higher Is Recommended)
 - [npm](https://www.npmjs.com/) (Node package manager)
 
 ### Installation
 
-1. Download starter project [di sini](https://raw.githubusercontent.com/dicodingacademy/a219-web-intermediate-labs/099-shared-files/starter-project-with-webpack.zip).
-2. Lakukan unzip file.
-3. Pasang seluruh dependencies dengan perintah berikut.
+1. Download The Source Code.
+2. Unzip The Project.
+3. Install ALl The Dependencies Using The Following Command.
    ```shell
    npm install
    ```
@@ -30,23 +30,23 @@ Proyek ini adalah setup dasar untuk aplikasi web yang menggunakan webpack untuk 
   ```shell
   npm run build
   ```
-  Script ini menjalankan webpack dalam mode production menggunakan konfigurasi `webpack.prod.js` dan menghasilkan sejumlah file build ke direktori `dist`.
+  This Script Is Used To Run Webpack In Production Mode With `webpack.prod.js` Configuration File And Produces Several Build File Inside The Directory `dist`.
 
 - Start Development Server:
   ```shell
   npm run start-dev
   ```
-  Script ini menjalankan server pengembangan webpack dengan fitur live reload dan mode development sesuai konfigurasi di`webpack.dev.js`.
+  This Script Is Used To Run Server In Webpack Development Mode With Live Reload And Development Mode Feature Based On `webpack.dev.js` Configuration File.
 
 - Serve:
   ```shell
   npm run serve
   ```
-  Script ini menggunakan [`http-server`](https://www.npmjs.com/package/http-server) untuk menyajikan konten dari direktori `dist`.
+  This Script Is Used To Serve The Content Of `dist` Directory With [`http-server`](https://www.npmjs.com/package/http-server). 
 
 ## Project Structure
 
-Proyek starter ini dirancang agar kode tetap modular dan terorganisir.
+This Project Was Designed So That Its Code Can Remain Modular And Organized.
 
 ```text
 starter-project/
