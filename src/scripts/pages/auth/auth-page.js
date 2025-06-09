@@ -1,4 +1,5 @@
 import axios from 'axios';
+import endpoint from '../../config';
 
 export default class AuthPage {
   async render() {
@@ -46,6 +47,7 @@ export default class AuthPage {
   }
 
   async afterRender() {
+  console.log(endpoint.BASE_URL);
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
   const authOverlay = document.getElementById('authOverlay');
@@ -79,7 +81,7 @@ export default class AuthPage {
     const password = loginForm.querySelector('input[type="password"]').value;
 
     try {
-      const response = await axios.post('http://103.75.25.67:5000/login', {
+      const response = await axios.post(`http://${endpoint.BASE_URL}/login`, {
         auth,
         password,
       });
@@ -115,7 +117,7 @@ export default class AuthPage {
     }
 
     try {
-      const response = await axios.post('http://103.75.25.67:5000/register', {
+      const response = await axios.post(`http://${endpoint.BASE_URL}/register`, {
         email,
         username,
         password,
