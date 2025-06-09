@@ -2,7 +2,7 @@ export default class AuthPage {
   async render() {
     return `
      <div class="home-container">
-        <div class="auth-panel" style="background: #18104a url('/Images/qq-2.png') center center no-repeat; background-size: cover;">
+      <div class="auth-panel" style="background: #18104a url('/Images/qq-2.png') center center no-repeat; background-size: cover;">
           <div class="auth-overlay" id="authOverlay"></div>
 
           <div class="auth-form-container">

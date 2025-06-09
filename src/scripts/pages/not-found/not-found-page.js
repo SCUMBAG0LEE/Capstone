@@ -4,7 +4,7 @@ export default class NotFoundPage {
       <div class="home-container" style=" min-height: 100vh; display: flex; flex-direction: column;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center">
           <h1 style="position: fixed; color: #fff; font-size: 48px; margin-bottom: 24px; top: 25%;">Not Found</h1>
-          <img src="/Images/notfound.gif" alt="Not Found" style="position: fixed; top: 35%; max-width: 400px; width: 100%; border-radius: 16px; box-shadow: 0 0 24px #0004;"/>
+          <img src="Images/notfound.gif" alt="Not Found" style="position: fixed; top: 35%; max-width: 400px; width: 100%; border-radius: 16px; box-shadow: 0 0 24px #0004;"/>
         </div>
       </div>
       `;
