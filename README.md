@@ -19,7 +19,7 @@ This Project Is A Web Application That Uses Webpack For Bundling, Babel For Tran
 
 1. Download The Source Code.
 2. Unzip The Project.
-3. Install ALl The Dependencies Using The Following Command.
+3. Install All The Dependencies Using The Following Command.
    ```shell
    npm install
    ```
