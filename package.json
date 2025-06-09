@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "Just Another Trading Website Project.",
   "scripts": {
+    "migrate": "node-pg-migrate --config migration.config.js",
+    "start": "node src/server.js",
     "start-dev": "webpack serve --config webpack.dev.js",
     "build": "webpack --config webpack.prod.js",
-    "start": "node src/server.js",
     "serve": "http-server dist",
-    "migrate": "node-pg-migrate --config migration.config.js"
+    "serve:https" : "http-server dist -S -C /etc/letsencrypt/live/nekocare.duckdns.org/fullchain.pem -K /etc/letsencrypt/live/nekocare.duckdns.org/privkey.pem -p 443",
+    "redirect" : "node src/redirect.js"
   },
   "keywords": [],
   "author": "SCUMBAG0LEE",
@@ -34,6 +36,7 @@
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.6",
     "dotenv": "^16.5.0",
+    "http": "^0.0.1-security",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "node-pg-migrate": "^8.0.2",
