@@ -150,6 +150,7 @@ body {
 }
 
 .home-subtitle {
+  z-index: 3;
   font-size: 250%;
   letter-spacing: 2px;
   font-weight: bold;
