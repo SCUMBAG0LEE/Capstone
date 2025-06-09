@@ -49,7 +49,7 @@ This Project Is A Web Application That Uses Webpack For Bundling, Babel For Tran
 This Project Was Designed So That Its Code Can Remain Modular And Organized.
 
 ```text
-starter-project/
+Capstone/
 ├── dist/                   # Compiled files for production
 ├── src/                    # Source project files
 │   ├── public/             # Public files
@@ -61,7 +61,6 @@ starter-project/
 ├── package.json            # Project metadata and dependencies
 ├── package-lock.json       # Project metadata and dependencies
 ├── README.md               # Project documentation
-├── STUDENT.txt             # Student information
 ├── webpack.common.js       # Webpack common configuration
 ├── webpack.dev.js          # Webpack development configuration
 └── webpack.prod.js         # Webpack production configuration
