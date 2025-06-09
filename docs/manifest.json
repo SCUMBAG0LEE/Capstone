@@ -1,0 +1,46 @@
+{
+    "short_name": "SignalX",
+    "name": "SignalX",
+    "icons": [
+      {
+        "src": "Images/favicon.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "shortcuts": [
+    {
+      "name": "Homepage",
+      "short_name": "Home",
+      "description": "Go to the homepage",
+      "url": "/",
+      "icons": [
+        {
+          "src": "Images/home.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+    "screenshots": [
+      {
+        "src": "Images/screenshot.png",
+        "sizes": "1440x900", 
+        "type": "image/png",
+        "form_factor": "wide"
+      },
+      {
+        "src": "Images/screenshot.png",
+        "sizes": "1440x900", 
+        "type": "image/png",
+        "form_factor": "narrow"
+      }
+    ],
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#03001B",
+    "theme_color": "#00AFFF",
+    "description": "Just Another Website For Capstone."
+  }
+  
