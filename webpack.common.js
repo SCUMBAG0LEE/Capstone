@@ -36,6 +36,10 @@ module.exports = {
           from: path.resolve(__dirname, 'src/styles/styles.css'),
           to: path.resolve(__dirname, 'dist/'),
         },
+        {
+          from: path.resolve(__dirname, 'src/scripts/data/sp500.json'),
+          to: path.resolve(__dirname, 'dist/'),
+        },
       ],
     }),
   ],
