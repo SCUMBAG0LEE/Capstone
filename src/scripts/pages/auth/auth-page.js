@@ -79,7 +79,7 @@ export default class AuthPage {
     const password = loginForm.querySelector('input[type="password"]').value;
 
     try {
-      const response = await axios.post('http://nekocare.duckdns.org:5000/login', {
+      const response = await axios.post('http://103.75.25.67:5000/login', {
         auth,
         password,
       });
@@ -115,7 +115,7 @@ export default class AuthPage {
     }
 
     try {
-      const response = await axios.post('http://nekocare.duckdns.org:5000/register', {
+      const response = await axios.post('http://103.75.25.67:5000/register', {
         email,
         username,
         password,
