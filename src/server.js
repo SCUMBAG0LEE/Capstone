@@ -6,6 +6,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const Jwt = require('@hapi/jwt');
+const fs = require('fs');
 require('dotenv').config();
 
 // Database connection
@@ -23,11 +24,27 @@ const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT || 5000,
     host: process.env.HOST || 'localhost',
+    /*
+    tls: {
+      key: fs.readFileSync('/etc/letsencrypt/live/nekocare.duckdns.org/privkey.pem'),
+      cert: fs.readFileSync('/etc/letsencrypt/live/nekocare.duckdns.org/cert.pem'),
+      ca: fs.readFileSync('/etc/letsencrypt/live/nekocare.duckdns.org/chain.pem'),
+    },
+    */
     routes: {
       cors: true,
     },
   });
 
+  /*
+  server.ext('onRequest', (request, h) => {
+  if (request.connection.info.protocol === 'http') {
+    return h.redirect(`https://${request.info.hostname}${request.url.path}`).permanent();
+  }
+  return h.continue;
+  });
+  */
+  
   await server.register(Jwt);
 
   // JWT strategy
