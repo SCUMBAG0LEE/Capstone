@@ -1,5 +1,5 @@
 const CONFIG = {
-  BASE_URL: 'https://localhost:5000',
+  BASE_URL: 'https://nekocare.duckdns.org:5000',
 };
 
 export default CONFIG;
