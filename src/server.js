@@ -24,14 +24,16 @@ const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT || 5000,
     host: process.env.HOST || 'localhost',
+    /*
     tls: {
       key: fs.readFileSync('/etc/letsencrypt/live/nekocare.duckdns.org/privkey.pem'),
       cert: fs.readFileSync('/etc/letsencrypt/live/nekocare.duckdns.org/cert.pem'),
       ca: fs.readFileSync('/etc/letsencrypt/live/nekocare.duckdns.org/chain.pem'),
     },
+    */
     routes: {
       cors: {
-        origin: ['https://nekocare.duckdns.org'],
+        origin: ['*'],
         credentials: true,
         headers: ['Accept', 'Authorization', 'Content-Type', 'If-None-Match'],
         additionalHeaders: ['cache-control', 'x-requested-with'],
@@ -43,12 +45,14 @@ const init = async () => {
     }
   });
 
+  /*
   server.ext('onRequest', (request, h) => {
     if (request.info.protocol === 'http') {
       return h.redirect(`https://${request.info.hostname}${request.url.path}`).permanent();
     }
     return h.continue;
   });
+  */
 
   await server.register(Jwt);
 
