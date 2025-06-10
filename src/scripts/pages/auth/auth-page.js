@@ -47,7 +47,7 @@ export default class AuthPage {
   }
 
   async afterRender() {
-  console.log("Backend At: ", ${endpoint.BASE_URL});
+  console.log(`Backend At: ${endpoint.BASE_URL}`);
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
   const authOverlay = document.getElementById('authOverlay');
