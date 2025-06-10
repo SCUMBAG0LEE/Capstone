@@ -47,7 +47,7 @@ export default class AuthPage {
   }
 
   async afterRender() {
-  console.log(endpoint.BASE_URL);
+  console.log("Backend At: ", ${endpoint.BASE_URL});
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
   const authOverlay = document.getElementById('authOverlay');
@@ -81,7 +81,7 @@ export default class AuthPage {
     const password = loginForm.querySelector('input[type="password"]').value;
 
     try {
-      const response = await axios.post(`http://${endpoint.BASE_URL}/login`, {
+      const response = await axios.post(`${endpoint.BASE_URL}/login`, {
         auth,
         password,
       });
@@ -117,7 +117,7 @@ export default class AuthPage {
     }
 
     try {
-      const response = await axios.post(`http://${endpoint.BASE_URL}/register`, {
+      const response = await axios.post(`${endpoint.BASE_URL}/register`, {
         email,
         username,
         password,
