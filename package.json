@@ -36,6 +36,7 @@
     "bcrypt": "^6.0.0",
     "bootstrap": "^5.3.6",
     "dotenv": "^16.5.0",
+    "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
