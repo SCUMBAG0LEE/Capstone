@@ -1,5 +1,5 @@
 // Simple Hapi.js backend for authentication with PostgreSQL
-
+const axios = require('axios');
 const Hapi = require('@hapi/hapi');
 const Joi = require('joi');
 const { Pool } = require('pg');
@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const Jwt = require('@hapi/jwt');
 const fs = require('fs');
+const { features } = require('process');
 require('dotenv').config();
 
 // Database connection
@@ -151,6 +152,36 @@ const init = async () => {
         token,
         user: { id: user.id, email: user.email, username: user.username },
       });
+    }
+  });
+
+//Predict route
+  server.route({
+    method: 'POST',
+    path: '/predict',
+    options: {
+      auth: false, // Ubah jika perlu autentikasi
+      validate: {
+        payload: Joi.object({
+          Close: Joi.number().required(),
+          rsi: Joi.number().required(),
+          macd: Joi.number().required(),
+          macd_signal: Joi.number().required(),
+          sma_20: Joi.number().required(),
+          ema_20: Joi.number().required(),
+          model: Joi.string().valid('rf', 'lr', 'knn', 'dt', 'nb').default('rf'),
+        })
+      }
+    },
+    handler: async (request, h) => {
+      const { model, ...features } = request.payload;
+      try {
+        const response = await axios.post(`http://localhost:8000/predict?model=${model}`, features);
+        return h.response(response.data);
+      } catch (err) {
+        console.error('Prediction error:', err.response?.data || err.message);
+        return h.response({ error: 'Failed to get prediction from ML service' }).code(500);
+      }
     }
   });
 
