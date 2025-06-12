@@ -1,4 +1,3 @@
-// Simple Hapi.js backend for authentication with PostgreSQL
 const axios = require('axios');
 const Hapi = require('@hapi/hapi');
 const Joi = require('joi');
@@ -7,7 +6,6 @@ const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const Jwt = require('@hapi/jwt');
 const fs = require('fs');
-const { features } = require('process');
 require('dotenv').config();
 
 // Database connection
@@ -68,14 +66,19 @@ const init = async () => {
       exp: true,
       timeSkewSec: 15,
     },
-    validate: async (artifacts, request, h) => ({
-      isValid: true,
-      credentials: {
-        id: artifacts.decoded.payload.id,
-        email: artifacts.decoded.payload.email,
-        username: artifacts.decoded.payload.username,
-      }
-    })
+    validate: async (artifacts, request, h) => {
+      // This function runs on every authenticated request.
+      // The token is already verified at this point.
+      // We are just extracting the payload to be used in request.auth.credentials
+      return {
+        isValid: true,
+        credentials: {
+          id: artifacts.decoded.payload.id,
+          email: artifacts.decoded.payload.email,
+          username: artifacts.decoded.payload.username,
+        },
+      };
+    },
   });
 
   // Register route
@@ -90,7 +93,7 @@ const init = async () => {
           password: Joi.string().min(6).required(),
           consent: Joi.boolean().valid(true).required(),
         }),
-      }
+      },
     },
     handler: async (request, h) => {
       const { email, username, password, consent } = request.payload;
@@ -104,9 +107,11 @@ const init = async () => {
         return h.response({ message: 'User registered successfully' }).code(201);
       } catch (err) {
         console.error(err);
-        return h.response({ error: 'Email or username may already exist' }).code(400);
+        // This is a generic error; a user could try to register with an existing email OR username
+
+        return h.response({ error: 'Email or username may already exist' }).code(409); // 409 Conflict is more appropriate
       }
-    }
+    },
   });
 
   // Login route
@@ -119,7 +124,7 @@ const init = async () => {
           auth: Joi.string().required(),
           password: Joi.string().required(),
         }),
-      }
+      },
     },
     handler: async (request, h) => {
       const { auth, password } = request.payload;
@@ -152,16 +157,21 @@ const init = async () => {
         token,
         user: { id: user.id, email: user.email, username: user.username },
       });
-    }
-  });
+     },
 
-//Predict route
+  });
+  // *** NEW: Authenticated Prediction Route ***
   server.route({
     method: 'POST',
-    path: '/predict',
+    path: '/predict/{model_key}',
     options: {
-      auth: false, // Ubah jika perlu autentikasi
+      auth: 'jwt', // This makes the route protected. A valid JWT must be provided.
       validate: {
+        params: Joi.object({
+          // Validate the model key from the URL to match Python API
+          model_key: Joi.string().valid('rf', 'lr', 'knn', 'dt', 'nb').required(),
+        }),
+        // Validate the incoming payload to match the Python API's `StockData` model
         payload: Joi.object({
           Close: Joi.number().required(),
           rsi: Joi.number().required(),
@@ -169,28 +179,45 @@ const init = async () => {
           macd_signal: Joi.number().required(),
           sma_20: Joi.number().required(),
           ema_20: Joi.number().required(),
-          model: Joi.string().valid('rf', 'lr', 'knn', 'dt', 'nb').default('rf'),
-        })
-      }
+        }),
+      },
     },
     handler: async (request, h) => {
-      const { model, ...features } = request.payload;
+      const { model_key } = request.params;
+      const stockData = request.payload;
+      // The URL for your Python FastAPI service. Use an environment variable for this.
+      // Defaults to http://localhost:8000 if not set.
+      const pythonApiUrl = `${process.env.PYTHON_API_BASE_URL || 'http://localhost:8000'}/predict/${model_key}`;
+      console.log(`Forwarding prediction request for user '${request.auth.credentials.username}' to Python service.`);
       try {
-        const response = await axios.post(`http://localhost:8000/predict?model=${model}`, features);
-        return h.response(response.data);
-      } catch (err) {
-        console.error('Prediction error:', err.response?.data || err.message);
-        return h.response({ error: 'Failed to get prediction from ML service' }).code(500);
+        // Use axios to make a POST request to the Python API with the stock data
+        const predictionResponse = await axios.post(pythonApiUrl, stockData, {
+            headers: { 'Content-Type': 'application/json' }
+        });
+        // Forward the prediction result from Python back to the original client
+        return h.response(predictionResponse.data).code(200);
+      } catch (error) {
+        console.error('Error calling Python prediction API:', error.message);
+        // Gracefully handle errors if the Python service is down or returns an error
+        if (error.response) {
+          // The Python API responded with an error (e.g., 404 Model Not Found, 500 Internal Error)
+          return h.response({ 
+            error: 'Prediction service failed.',
+            details: error.response.data 
+          }).code(error.response.status);
+        }
+        // The request was made but no response was received (e.g., service is down)
+        return h.response({ error: 'Prediction service is currently unavailable.' }).code(503); // 503 Service Unavailable
       }
-    }
+    },
   });
 
   await server.start();
-  console.log('Server running on %s', server.info.uri);
+  console.log('Node.js server running on %s', server.info.uri);
 };
 
 process.on('unhandledRejection', err => {
-  console.error(err);
+  console.error('An unhandled rejection occurred:', err);
   process.exit(1);
 });
 
