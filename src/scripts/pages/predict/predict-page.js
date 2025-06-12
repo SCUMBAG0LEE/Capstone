@@ -1,28 +1,39 @@
+import axios from 'axios'; // Import axios for making HTTP requests
+import endpoint from '../../config'; // Import the endpoint configuration
+
 export default class PredictPage {
   async render() {
-    if (!localStorage.getItem('token')) { window.location.href = "#/auth"; return ''; }
+    if (!localStorage.getItem('token')) {
+      window.location.href = "#/auth";
+      return '';
+    }
     return `
       <div class="home-container">
         <div class="predict-main">
-          <div class="predict-chart-panel">
-            <select id="intervalSelect" class="predict-input">
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-              <option value="decade">Decade</option>
-            </select>
-            <h3 id="chartTitle" style="color: #222; text-align: center; margin-bottom: 10px;">Loading Chart...</h3>
-            <canvas id="stockChart" width="800" height="300"></canvas>
-          </div>
           <div class="predict-input-panel">
-            <select id="symbolSelect" class="predict-input"></select>
-            <input class="predict-input" type="number" placeholder="Amount Owned (optional)" id="amountInput" />
-            <input class="predict-input" type="number" placeholder="Purchase Price (optional)" id="priceInput" />
-            <input class="predict-input" type="text" placeholder="Prediction Timeframe*" id="timeframeInput" />
-            <button class="home-btn" id="adviceBtn">
-              📈 Advice
+            <h2>Stock Prediction</h2>
+            <p>Enter the stock's financial indicators to get a trading signal.</p>
+
+            <select id="modelSelect" class="predict-input">
+              <option value="rf">Random Forest (rf)</option>
+              <option value="lr">Logistic Regression (lr)</option>
+              <option value="knn">K-Nearest Neighbors (knn)</option>
+              <option value="dt">Decision Tree (dt)</option>
+              <option value="nb">Naive Bayes (nb)</option>
+            </select>
+
+            <input class="predict-input" type="number" step="0.01" placeholder="Close Price" id="closeInput" required />
+            <input class="predict-input" type="number" step="0.01" placeholder="RSI" id="rsiInput" required />
+            <input class="predict-input" type="number" step="0.01" placeholder="MACD" id="macdInput" required />
+            <input class="predict-input" type="number" step="0.01" placeholder="MACD Signal" id="macdSignalInput" required />
+            <input class="predict-input" type="number" step="0.01" placeholder="SMA 20" id="sma20Input" required />
+            <input class="predict-input" type="number" step="0.01" placeholder="EMA 20" id="ema20Input" required />
+
+            <button class="home-btn" id="predictBtn">
+              📊 Get Prediction
             </button>
+            <div id="predictionResult" class="prediction-result"></div>
+            <div id="errorMessage" class="error-message"></div>
           </div>
         </div>
       </div>
@@ -30,7 +41,7 @@ export default class PredictPage {
   }
 
   async afterRender() {
-    // Highlight nav link
+    // Highlight nav link for 'predict'
     ['home', 'auth', 'about', 'predict'].forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -39,89 +50,100 @@ export default class PredictPage {
       }
     });
 
-    const API_KEY = 'R7K13FGHUZMLHYGR';
-    const sp500 = await fetch('sp500.json').then(res => res.json());
+    // Get elements from the DOM
+    const modelSelect = document.getElementById('modelSelect');
+    const closeInput = document.getElementById('closeInput');
+    const rsiInput = document.getElementById('rsiInput');
+    const macdInput = document.getElementById('macdInput');
+    const macdSignalInput = document.getElementById('macdSignalInput');
+    const sma20Input = document.getElementById('sma20Input');
+    const ema20Input = document.getElementById('ema20Input');
+    const predictBtn = document.getElementById('predictBtn');
+    const predictionResultDiv = document.getElementById('predictionResult');
+    const errorMessageDiv = document.getElementById('errorMessage');
 
-    const symbolSelect = document.getElementById('symbolSelect');
-    const intervalSelect = document.getElementById('intervalSelect');
-    const chartTitle = document.getElementById('chartTitle');
-    const ctx = document.getElementById('stockChart').getContext('2d');
-    let chart;
+    // Remove chart related elements, as they are no longer needed with the new backend
+    const chartPanel = document.querySelector('.predict-chart-panel');
+    if (chartPanel) chartPanel.remove();
 
-    // Populate symbol dropdown
-    sp500.forEach(stock => {
-      const opt = document.createElement('option');
-      opt.value = stock.Symbol;
-      opt.textContent = `${stock.Symbol} - ${stock.Name}`;
-      symbolSelect.appendChild(opt);
-    });
+    // Add event listener for the prediction button click
+    predictBtn.addEventListener('click', async () => {
+      predictionResultDiv.textContent = ''; // Clear previous results
+      errorMessageDiv.textContent = ''; // Clear previous errors
 
-    async function fetchAndRenderChart() {
-      const symbol = symbolSelect.value;
-      const interval = intervalSelect.value;
-      chartTitle.textContent = `${symbol} Stock Chart`;
-
-      let functionType = 'TIME_SERIES_DAILY';
-      if (interval === 'weekly') functionType = 'TIME_SERIES_WEEKLY';
-      if (interval === 'monthly') functionType = 'TIME_SERIES_MONTHLY';
-
-      const res = await fetch(`https://www.alphavantage.co/query?function=${functionType}&symbol=${symbol}&apikey=${API_KEY}`);
-      const data = await res.json();
-
-      let timeSeries = data['Time Series (Daily)'] || data['Weekly Time Series'] || data['Monthly Time Series'];
-      if (!timeSeries) return;
-
-      let chartData = Object.entries(timeSeries).slice(0, 100).reverse().map(([date, val]) => ({
-        x: date,
-        y: parseFloat(val['4. close'])
-      }));
-
-      if (interval === 'yearly' || interval === 'decade') {
-        const yearly = {};
-        chartData.forEach(d => {
-          const year = d.x.slice(0, 4);
-          (yearly[year] ||= []).push(d.y);
-        });
-        chartData = Object.entries(yearly).map(([year, closes]) => ({
-          x: interval === 'decade' ? `${year.slice(0, 3)}0s` : year,
-          y: closes.reduce((a, b) => a + b, 0) / closes.length
-        }));
+      // Retrieve authentication token from local storage
+      const token = localStorage.getItem('token');
+      if (!token) {
+        errorMessageDiv.textContent = 'Authentication token not found. Please log in.';
+        window.location.href = "#/auth"; // Redirect to auth page if token is missing
+        return;
       }
 
-      if (chart) chart.destroy();
+      // Get the selected model key and construct the payload from input fields
+      const model_key = modelSelect.value;
+      const payload = {
+        Close: parseFloat(closeInput.value),
+        rsi: parseFloat(rsiInput.value),
+        macd: parseFloat(macdInput.value),
+        macd_signal: parseFloat(macdSignalInput.value),
+        sma_20: parseFloat(sma20Input.value),
+        ema_20: parseFloat(ema20Input.value),
+      };
 
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: chartData.map(d => d.x),
-          datasets: [{
-            label: `${symbol} Close Price`,
-            data: chartData.map(d => d.y),
-            borderColor: '#1da7e7',
-            tension: 0.3
-          }]
-        },
-        options: {
-          responsive: true,
-          scales: {
-            x: { ticks: { font: { size: 10 } } },
-            y: { beginAtZero: false }
-          }
+      // Basic input validation: Check if all payload values are valid numbers
+      for (const key in payload) {
+        if (isNaN(payload[key])) {
+          errorMessageDiv.textContent = `Please enter valid numbers for all fields. Missing or invalid: ${key}`;
+          return;
         }
-      });
-    }
+      }
 
-    symbolSelect.addEventListener('change', fetchAndRenderChart);
-    intervalSelect.addEventListener('change', fetchAndRenderChart);
+      try {
+        predictBtn.disabled = true; // Disable button to prevent multiple clicks
+        predictBtn.textContent = 'Predicting...'; // Update button text to indicate loading
 
-    fetchAndRenderChart();
-    document.getElementById('home').style.textDecoration = 'unset';
-    document.getElementById('home').style.color = '#fff';
-    document.getElementById('auth').style.textDecoration = 'unset';
-    document.getElementById('auth').style.color = '#fff';
-    document.getElementById('about').style.textDecoration = 'unset';
-    document.getElementById('about').style.color = '#fff';
-    document.getElementById('predict').style.textDecoration = 'underline';
-    document.getElementById('predict').style.color = '#1da7e7';
+        // Make the POST request to the Hapi.js backend's prediction endpoint
+        const response = await axios.post(
+          `${endpoint.BASE_URL}/predict/${model_key}`, // Using the imported endpoint base URL
+          payload,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` // Include the JWT token for authentication
+            },
+          }
+        );
+
+        // Handle successful prediction response
+        if (response.status === 200) {
+          const { model_used, prediction_numeric, prediction_label } = response.data;
+          // Display the prediction result
+          predictionResultDiv.innerHTML = `
+            <h3>Prediction Result:</h3>
+            <p><strong>Model Used:</strong> ${model_used}</p>
+            <p><strong>Numeric Prediction:</strong> ${prediction_numeric}</p>
+            <p><strong>Trading Signal:</strong> <span style="font-weight: bold; color: ${prediction_label === 'Buy' ? 'green' : prediction_label === 'Sell' ? 'red' : 'orange'};">${prediction_label}</span></p>
+          `;
+        } else {
+          // Handle unexpected non-200 responses
+          errorMessageDiv.textContent = `Prediction failed: ${response.data.error || 'Unknown error'}`;
+        }
+      } catch (error) {
+        console.error('Error during prediction:', error);
+        if (error.response) {
+          // The API responded with an error status code and possibly a message
+          errorMessageDiv.textContent = `Error: ${error.response.data.error || error.response.statusText || 'An error occurred'}`;
+        } else if (error.request) {
+          // The request was made but no response was received (e.g., network error, server down)
+          errorMessageDiv.textContent = 'No response from server. Prediction service might be unavailable.';
+        } else {
+          // Something else happened while setting up the request that triggered an Error
+          errorMessageDiv.textContent = `An unexpected error occurred: ${error.message}`;
+        }
+      } finally {
+        predictBtn.disabled = false; // Re-enable the button
+        predictBtn.textContent = '📊 Get Prediction'; // Reset button text
+      }
+    });
   }
 }
