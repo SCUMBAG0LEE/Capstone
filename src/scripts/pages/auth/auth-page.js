@@ -1,12 +1,27 @@
-import axios from 'axios';
-import endpoint from '../../config';
+import AuthPagePresenter from '../presenters/auth-page-presenter';
+import MessageBox from '../ui/message-box'; // Import the custom message box
 
 export default class AuthPage {
+  #presenter = null;
+  #loginForm = null;
+  #registerForm = null;
+  #authOverlay = null;
+
+  /**
+   * Renders the HTML content for the Authentication page (Login/Register).
+   * If a token exists in local storage, it redirects to the home page.
+   * @returns {Promise<string>} A promise that resolves with the HTML string.
+   */
   async render() {
-    if (localStorage.getItem('token')) { window.location.href = "#/"; return ''; }
+    // If user is already authenticated, redirect to home page
+    if (localStorage.getItem('token')) {
+      window.location.href = "#/";
+      return ''; // Return empty string as we are redirecting
+    }
+
     return `
-     <div class="home-container">
-      <div class="auth-panel" style="background: #18104a url('Images/qq-2.png') center center no-repeat; background-size: cover;">
+      <div class="home-container">
+        <div class="auth-panel" style="background: #18104a url('Images/qq-2.png') center center no-repeat; background-size: cover;">
           <div class="auth-overlay" id="authOverlay"></div>
 
           <div class="auth-form-container">
@@ -14,13 +29,13 @@ export default class AuthPage {
             <div class="login-form" id="loginForm">
               <p class="auth-subtitle">Welcome back!</p>
               <h2 style="margin-bottom: 5px;">Login to your Account</h2>
-              <input type="text" placeholder="Username / Email" />
-              <input type="password" placeholder="Password" />
+              <input type="text" placeholder="Username / Email" id="loginAuthInput" />
+              <input type="password" placeholder="Password" id="loginPasswordInput" />
               <div class="form-options">
-                <label><input type="checkbox" /> Remember me </label>
+                <label><input type="checkbox" id="rememberMeCheckbox" /> Remember me </label>
                 <a href="#" class="forgot-link">Forgot Password?</a>
               </div>
-              <button class="auth-btn">LOG IN</button>
+              <button class="auth-btn" id="loginBtn">LOG IN</button>
               <div class="toggle-link">
                 Don't have an account? <span id="showRegister">Create an account</span>
               </div>
@@ -30,12 +45,12 @@ export default class AuthPage {
             <div class="register-form hidden-form" id="registerForm">
               <p class="auth-subtitle">Unlock all Features!</p>
               <h2 style="margin-bottom: 5px;">Create your account</h2>
-              <input type="text" placeholder="Username" />
-              <input type="email" placeholder="Email" />
-              <input type="password" placeholder="Password" />
-              <input type="password" placeholder="Confirm Password" />
-              <label><input type="checkbox" /> Accept terms and conditions</label>
-              <button class="auth-btn">REGISTER</button>
+              <input type="text" placeholder="Username" id="registerUsernameInput" />
+              <input type="email" placeholder="Email" id="registerEmailInput" />
+              <input type="password" placeholder="Password" id="registerPasswordInput" />
+              <input type="password" placeholder="Confirm Password" id="registerConfirmPasswordInput" />
+              <label><input type="checkbox" id="registerConsentCheckbox" /> Accept terms and conditions</label>
+              <button class="auth-btn" id="registerBtn">REGISTER</button>
               <div class="toggle-link">
                 You have an account? <span id="showLogin">Login now</span>
               </div>
@@ -46,98 +61,89 @@ export default class AuthPage {
     `;
   }
 
+  /**
+   * Executes after the Auth page has been rendered to the DOM.
+   * Initializes form elements, attaches event listeners, and sets up the presenter.
+   * @returns {Promise<void>} A promise that resolves when afterRender is complete.
+   */
   async afterRender() {
-  console.log(`Backend At: ${endpoint.BASE_URL}`);
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const authOverlay = document.getElementById('authOverlay');
+    this.#loginForm = document.getElementById('loginForm');
+    this.#registerForm = document.getElementById('registerForm');
+    this.#authOverlay = document.getElementById('authOverlay');
 
-  // Toggle forms
-  document.getElementById('showRegister').addEventListener('click', () => {
-    loginForm.classList.add('hidden-form');
-    registerForm.classList.remove('hidden-form');
-    authOverlay.classList.add('move-right');
-  });
+    // Initialize the presenter with this view (AuthPage instance)
+    this.#presenter = new AuthPagePresenter(this);
 
-  document.getElementById('showLogin').addEventListener('click', () => {
-    loginForm.classList.remove('hidden-form');
-    registerForm.classList.add('hidden-form');
-    authOverlay.classList.remove('move-right');
-  });
+    // Attach event listeners for toggling forms
+    document.getElementById('showRegister').addEventListener('click', () => {
+      this.showRegisterForm();
+    });
 
-  // NAV STYLING
-  document.getElementById('home').style.textDecoration = 'unset';
-  document.getElementById('home').style.color = '#fff';
-  document.getElementById('auth').style.textDecoration = 'underline';
-  document.getElementById('auth').style.color = '#1da7e7';
-  document.getElementById('about').style.textDecoration = 'unset';
-  document.getElementById('about').style.color = '#fff';
-  document.getElementById('predict').style.textDecoration = 'unset';
-  document.getElementById('predict').style.color = '#fff';
+    document.getElementById('showLogin').addEventListener('click', () => {
+      this.showLoginForm();
+    });
 
-  // LOGIN HANDLER
-  loginForm.querySelector('.auth-btn').addEventListener('click', async () => {
-    const auth = loginForm.querySelector('input[type="text"]').value;
-    const password = loginForm.querySelector('input[type="password"]').value;
+    // Attach event listener for Login button
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const auth = document.getElementById('loginAuthInput').value;
+      const password = document.getElementById('loginPasswordInput').value;
+      this.#presenter.handleLogin(auth, password);
+    });
 
-    try {
-      const response = await axios.post(`${endpoint.BASE_URL}/login`, {
-        auth,
-        password,
-      });
+    // Attach event listener for Register button
+    document.getElementById('registerBtn').addEventListener('click', () => {
+      const username = document.getElementById('registerUsernameInput').value;
+      const email = document.getElementById('registerEmailInput').value;
+      const password = document.getElementById('registerPasswordInput').value;
+      const confirmPassword = document.getElementById('registerConfirmPasswordInput').value;
+      const consent = document.getElementById('registerConsentCheckbox').checked;
+      this.#presenter.handleRegister(username, email, password, confirmPassword, consent);
+    });
 
-      alert('Login successful!');
-      console.log(response.data);
-      localStorage.setItem('token', response.data.token);
-      window.location.href = "#/";
+    // The navigation highlighting logic is now handled in App.js's _highlightActiveNavLink method.
+    // This reduces duplication and centralizes navigation state management.
+    // The previous code directly manipulating styles here is removed.
+  }
 
-      // Save token/userId or redirect user here
+  /**
+   * Displays an error message using the custom message box.
+   * @param {string} message The error message to display.
+   */
+  displayError(message) {
+    MessageBox.show(message, 'error');
+  }
 
-    } catch (error) {
-      if (error.response) {
-        alert(error.response.data.error || 'Login failed');
-      } else {
-        alert('Error connecting to server');
-      }
-      console.error(error);
-    }
-  });
+  /**
+   * Displays a success message using the custom message box.
+   * @param {string} message The success message to display.
+   */
+  displaySuccess(message) {
+    MessageBox.show(message, 'success');
+  }
 
-  // REGISTER HANDLER
-  registerForm.querySelector('.auth-btn').addEventListener('click', async () => {
-    const username = registerForm.querySelector('input[placeholder="Username"]').value;
-    const email = registerForm.querySelector('input[placeholder="Email"]').value;
-    const password = registerForm.querySelectorAll('input[placeholder="Password"]')[0].value;
-    const confirmPassword = registerForm.querySelectorAll('input[placeholder="Confirm Password"]')[0].value;
-    const consent = registerForm.querySelector('input[type="checkbox"]').checked;
+  /**
+   * Shows the register form and hides the login form, animating the overlay.
+   */
+  showRegisterForm() {
+    this.#loginForm.classList.add('hidden-form');
+    this.#registerForm.classList.remove('hidden-form');
+    this.#authOverlay.classList.add('move-right');
+  }
 
-    if (password !== confirmPassword) {
-      alert("Passwords don't match");
-      return;
-    }
+  /**
+   * Shows the login form and hides the register form, animating the overlay.
+   */
+  showLoginForm() {
+    this.#loginForm.classList.remove('hidden-form');
+    this.#registerForm.classList.add('hidden-form');
+    this.#authOverlay.classList.remove('move-right');
+  }
 
-    try {
-      const response = await axios.post(`${endpoint.BASE_URL}/register`, {
-        email,
-        username,
-        password,
-        consent,
-      });
-
-      alert('Registration successful!');
-      console.log(response.data);
-      // Optional: switch to login form after successful register
-      document.getElementById('showLogin').click();
-
-    } catch (error) {
-      if (error.response) {
-        alert(error.response.data.error || 'Registration failed');
-      } else {
-        alert('Error connecting to server');
-      }
-      console.error(error);
-    }
-  });
-}
-
+  /**
+   * Redirects the user to a specified URL.
+   * @param {string} url The URL hash to redirect to.
+   */
+  redirectTo(url) {
+    window.location.hash = url;
+  }
 }

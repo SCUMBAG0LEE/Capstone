@@ -1,12 +1,30 @@
-import axios from 'axios'; // Import axios for making HTTP requests
-import endpoint from '../../config'; // Import the endpoint configuration
+import PredictPagePresenter from '../presenters/predict-page-presenter';
+import MessageBox from '../ui/message-box'; // Import the custom message box
 
 export default class PredictPage {
+  #presenter = null;
+  #modelSelect = null;
+  #closeInput = null;
+  #rsiInput = null;
+  #macdInput = null;
+  #macdSignalInput = null;
+  #sma20Input = null;
+  #ema20Input = null;
+  #predictBtn = null;
+  #predictionResultDiv = null;
+
+  /**
+   * Renders the HTML content for the Prediction page.
+   * If no token exists in local storage, it redirects to the authentication page.
+   * @returns {Promise<string>} A promise that resolves with the HTML string.
+   */
   async render() {
+    // Check if the user is authenticated
     if (!localStorage.getItem('token')) {
-      window.location.href = "#/auth";
-      return '';
+      window.location.hash = "#/auth"; // Redirect to auth page if no token
+      return ''; // Return empty string as we are redirecting
     }
+
     return `
       <div class="home-container">
         <div class="predict-main">
@@ -33,117 +51,95 @@ export default class PredictPage {
               📊 Get Prediction
             </button>
             <div id="predictionResult" class="prediction-result"></div>
-            <div id="errorMessage" class="error-message"></div>
+            <!-- Removed errorMessageDiv as MessageBox will handle errors -->
           </div>
         </div>
       </div>
     `;
   }
 
+  /**
+   * Executes after the Predict page has been rendered to the DOM.
+   * Initializes form elements, attaches event listeners, and sets up the presenter.
+   * @returns {Promise<void>} A promise that resolves when afterRender is complete.
+   */
   async afterRender() {
-    // Highlight nav link for 'predict'
-    ['home', 'auth', 'about', 'predict'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) {
-        el.style.textDecoration = id === 'predict' ? 'underline' : 'unset';
-        el.style.color = id === 'predict' ? '#1da7e7' : '#fff';
-      }
-    });
+    // The navigation highlighting logic is now handled in App.js's _highlightActiveNavLink method.
+    // The previous code directly manipulating styles here is removed.
 
-    // Get elements from the DOM
-    const modelSelect = document.getElementById('modelSelect');
-    const closeInput = document.getElementById('closeInput');
-    const rsiInput = document.getElementById('rsiInput');
-    const macdInput = document.getElementById('macdInput');
-    const macdSignalInput = document.getElementById('macdSignalInput');
-    const sma20Input = document.getElementById('sma20Input');
-    const ema20Input = document.getElementById('ema20Input');
-    const predictBtn = document.getElementById('predictBtn');
-    const predictionResultDiv = document.getElementById('predictionResult');
-    const errorMessageDiv = document.getElementById('errorMessage');
+    // Get elements from the DOM and assign them to instance variables
+    this.#modelSelect = document.getElementById('modelSelect');
+    this.#closeInput = document.getElementById('closeInput');
+    this.#rsiInput = document.getElementById('rsiInput');
+    this.#macdInput = document.getElementById('macdInput');
+    this.#macdSignalInput = document.getElementById('macdSignalInput');
+    this.#sma20Input = document.getElementById('sma20Input');
+    this.#ema20Input = document.getElementById('ema20Input');
+    this.#predictBtn = document.getElementById('predictBtn');
+    this.#predictionResultDiv = document.getElementById('predictionResult');
 
     // Remove chart related elements, as they are no longer needed with the new backend
     const chartPanel = document.querySelector('.predict-chart-panel');
     if (chartPanel) chartPanel.remove();
 
-    // Add event listener for the prediction button click
-    predictBtn.addEventListener('click', async () => {
-      predictionResultDiv.textContent = ''; // Clear previous results
-      errorMessageDiv.textContent = ''; // Clear previous errors
+    // Initialize the presenter with this view (PredictPage instance)
+    this.#presenter = new PredictPagePresenter(this);
 
-      // Retrieve authentication token from local storage
-      const token = localStorage.getItem('token');
-      if (!token) {
-        errorMessageDiv.textContent = 'Authentication token not found. Please log in.';
-        window.location.href = "#/auth"; // Redirect to auth page if token is missing
-        return;
-      }
+    // Add event listener for the prediction button click
+    this.#predictBtn.addEventListener('click', () => {
+      this.#predictionResultDiv.textContent = ''; // Clear previous results
 
       // Get the selected model key and construct the payload from input fields
-      const model_key = modelSelect.value;
+      const model_key = this.#modelSelect.value;
       const payload = {
-        Close: parseFloat(closeInput.value),
-        rsi: parseFloat(rsiInput.value),
-        macd: parseFloat(macdInput.value),
-        macd_signal: parseFloat(macdSignalInput.value),
-        sma_20: parseFloat(sma20Input.value),
-        ema_20: parseFloat(ema20Input.value),
+        Close: parseFloat(this.#closeInput.value),
+        rsi: parseFloat(this.#rsiInput.value),
+        macd: parseFloat(this.#macdInput.value),
+        macd_signal: parseFloat(this.#macdSignalInput.value),
+        sma_20: parseFloat(this.#sma20Input.value),
+        ema_20: parseFloat(this.#ema20Input.value),
       };
 
-      // Basic input validation: Check if all payload values are valid numbers
-      for (const key in payload) {
-        if (isNaN(payload[key])) {
-          errorMessageDiv.textContent = `Please enter valid numbers for all fields. Missing or invalid: ${key}`;
-          return;
-        }
-      }
-
-      try {
-        predictBtn.disabled = true; // Disable button to prevent multiple clicks
-        predictBtn.textContent = 'Predicting...'; // Update button text to indicate loading
-
-        // Make the POST request to the Hapi.js backend's prediction endpoint
-        const response = await axios.post(
-          `${endpoint.BASE_URL}/predict/${model_key}`, // Using the imported endpoint base URL
-          payload,
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}` // Include the JWT token for authentication
-            },
-          }
-        );
-
-        // Handle successful prediction response
-        if (response.status === 200) {
-          const { model_used, prediction_numeric, prediction_label } = response.data;
-          // Display the prediction result
-          predictionResultDiv.innerHTML = `
-            <h3>Prediction Result:</h3>
-            <p><strong>Model Used:</strong> ${model_used}</p>
-            <p><strong>Numeric Prediction:</strong> ${prediction_numeric}</p>
-            <p><strong>Trading Signal:</strong> <span style="font-weight: bold; color: ${prediction_label === 'Buy' ? 'green' : prediction_label === 'Sell' ? 'red' : 'orange'};">${prediction_label}</span></p>
-          `;
-        } else {
-          // Handle unexpected non-200 responses
-          errorMessageDiv.textContent = `Prediction failed: ${response.data.error || 'Unknown error'}`;
-        }
-      } catch (error) {
-        console.error('Error during prediction:', error);
-        if (error.response) {
-          // The API responded with an error status code and possibly a message
-          errorMessageDiv.textContent = `Error: ${error.response.data.error || error.response.statusText || 'An error occurred'}`;
-        } else if (error.request) {
-          // The request was made but no response was received (e.g., network error, server down)
-          errorMessageDiv.textContent = 'No response from server. Prediction service might be unavailable.';
-        } else {
-          // Something else happened while setting up the request that triggered an Error
-          errorMessageDiv.textContent = `An unexpected error occurred: ${error.message}`;
-        }
-      } finally {
-        predictBtn.disabled = false; // Re-enable the button
-        predictBtn.textContent = '📊 Get Prediction'; // Reset button text
-      }
+      this.#presenter.handlePrediction(model_key, payload);
     });
+  }
+
+  /**
+   * Displays an error message using the custom message box.
+   * @param {string} message The error message to display.
+   */
+  displayError(message) {
+    MessageBox.show(message, 'error');
+  }
+
+  /**
+   * Displays the prediction result on the page.
+   * @param {object} data The prediction data (model_used, prediction_numeric, prediction_label).
+   */
+  displayPredictionResult(data) {
+    const { model_used, prediction_numeric, prediction_label } = data;
+    this.#predictionResultDiv.innerHTML = `
+      <h3>Prediction Result:</h3>
+      <p><strong>Model Used:</strong> ${model_used}</p>
+      <p><strong>Numeric Prediction:</strong> ${prediction_numeric}</p>
+      <p><strong>Trading Signal:</strong> <span style="font-weight: bold; color: ${prediction_label === 'Buy' ? 'green' : prediction_label === 'Sell' ? 'red' : 'orange'};">${prediction_label}</span></p>
+    `;
+  }
+
+  /**
+   * Sets the loading state for the prediction button.
+   * @param {boolean} isLoading True to show loading state, false otherwise.
+   */
+  setLoadingState(isLoading) {
+    this.#predictBtn.disabled = isLoading;
+    this.#predictBtn.textContent = isLoading ? 'Predicting...' : '📊 Get Prediction';
+  }
+
+  /**
+   * Redirects the user to a specified URL.
+   * @param {string} url The URL hash to redirect to.
+   */
+  redirectTo(url) {
+    window.location.hash = url;
   }
 }

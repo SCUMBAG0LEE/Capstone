@@ -8,10 +8,10 @@
     <link rel="shortcut icon" href="Images/favicon.png">
     <link rel="manifest" href="manifest.json">
     <title>SignalX</title>
+    <!-- Inter font from Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   </head>
   <body>
-    <!-- Skip to content for accessibility -->
-    <!-- <a href="#main-content" class="skip-link">Skip to content</a> -->
     <header>
       <div class="main-header container">
         <a class="brand-name" href="#/"><img src="Images/logo.png" alt="Signal X Logo" class="brand-logo" /></a>
@@ -25,11 +25,12 @@
           </ul>
         </nav>
 
-        <button id="drawer-button" class="drawer-button">☰</button>
+        <button id="drawer-button" class="drawer-button" aria-label="Toggle navigation">☰</button>
       </div>
     </header>
 
     <main id="main-content" class="main-content"></main>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Container for the custom message box -->
+    <div id="message-box-container"></div>
   </body>
 </html>
