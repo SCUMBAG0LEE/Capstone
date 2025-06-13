@@ -22,6 +22,7 @@ This Project Is A Web Application That Uses Webpack For Bundling, Babel For Tran
 
 - [Node.js](https://nodejs.org/) (Version 12 Or Higher Is Recommended)
 - [npm](https://www.npmjs.com/) (Node package manager)
+- [python](https://www.python.org/) (Version 3.11 Or Higher Is Recommended)
 
 ### Installation
 
