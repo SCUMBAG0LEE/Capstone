@@ -13,6 +13,7 @@ This Project Is A Web Application That Uses Webpack For Bundling, Babel For Tran
   - [3. Logging In](#3-logging-in)
   - [4. Creating a New Account](#4-creating-a-new-account)
   - [5. Logging In After Registration](#5-logging-in-after-registration)
+  - [6. Using the Prediction Page](#6-using-the-prediction-page)
   - [Password Reset Tips](#password-reset-tips)
 
 ## Getting Started
@@ -155,6 +156,51 @@ If you don't have an account yet, follow these steps:
 - Enter your **username** and **password** that you registered.
 - Click **Log In** to access the application.
 - Now you can use all available features, such as the **Predict** menu after logging in.
+
+### 6. Using the Prediction Page
+
+The **Prediction** page allows you to use various machine learning models to predict stock-related values based on several technical indicators.
+
+#### Available Machine Learning Models
+
+You can choose from the following models:
+
+- **K-Nearest Neighbors (KNN):**  
+  A simple algorithm that predicts the value based on the closest data points (neighbors) in the dataset.
+
+- **Random Forest (RF):**  
+  An ensemble model that builds multiple decision trees and combines their results for more accurate and robust predictions.
+
+- **Logistic Regression (LR):**  
+  A statistical model used for classification problems, estimating the probability of a certain class or event.
+
+- **Decision Tree (DT):**  
+  A model that splits the data into branches to make decisions based on feature values, resulting in a tree-like structure.
+
+- **Naive Bayes (NB):**  
+  A probabilistic classifier based on Bayes' theorem, assuming independence between features.
+
+#### Input Features Explained
+
+When making a prediction, you will need to provide the following features:
+
+- **Close Price:**  
+  The closing price of the asset on a particular day.
+
+- **RSI (Relative Strength Index):**  
+  A momentum oscillator that measures the speed and change of price movements, used to identify overbought or oversold conditions.
+
+- **MACD (Moving Average Convergence Divergence):**  
+  A trend-following momentum indicator that shows the relationship between two moving averages of a security’s price.
+
+- **MACD Signal:**  
+  The signal line is a moving average of the MACD, used to identify potential buy or sell signals.
+
+- **SMA 20 (Simple Moving Average 20):**  
+  The average of the closing prices over the last 20 periods. It smooths out price data to identify the direction of the trend.
+
+- **EMA 20 (Exponential Moving Average 20):**  
+  Similar to SMA but gives more weight to recent prices, making it more responsive to new information.
 
 ### Password Reset Tips
 
