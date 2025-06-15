@@ -8,7 +8,6 @@ export default class HomePage {
       <div class="home-container">
         <div class="home-main">
           <div class="home-text">
-            <h1 class="home-title">SignalX</h1>
             <p class="home-subtitle">Your stock prediction genie</p>
           </div>
           <img src="Images/qq-1.png" alt="Genie illustration" class="genie-art" />
