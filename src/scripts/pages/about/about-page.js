@@ -11,7 +11,7 @@ export default class AboutPage {
         <div style="display: flex; justify-content: center; margin-top: 40px;">
           <img src="Images/about.gif" alt="About section illustration" style="position: fixed; bottom: 10%; max-width: 500px; height: 50vh; border-radius: 16px; box-shadow: 0 0 24px rgba(0, 0, 0, 0.25);"/>
         </div>
-        <img src="Images/hex-2.png" alt="Hexagon background element" class="hex-2" />
+        <img src="Images/hex.png" alt="Hexagon background element" class="hex-2" />
         <div class="circle-2"></div>
       </div>
     `;

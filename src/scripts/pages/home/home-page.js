@@ -13,7 +13,7 @@ export default class HomePage {
           </div>
           <img src="Images/qq-1.png" alt="Genie illustration" class="genie-art" />
         </div>
-        <img src="Images/hex-1.png" alt="Hexagon background element" class="hex-1" />
+        <img src="Images/hex.png" alt="Hexagon background element" class="hex-1" />
         <div class="circle-1"></div>
       </div>
     `;
