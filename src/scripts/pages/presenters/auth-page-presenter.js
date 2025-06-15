@@ -64,6 +64,16 @@ export default class AuthPagePresenter {
       return;
     }
 
+    if (!email.includes('@') || !email.includes('.')) {
+      this.#view.displayError('Invalid email address format.');
+      return;
+    }
+
+    if (password.length < 6) {
+      this.#view.displayError("Password must be at least 6 characters long.");
+      return;
+    }
+
     try {
       // Call the register method from the Auth Service
       await AuthService.register(username, email, password, consent);

@@ -30,11 +30,21 @@ export default class AuthPage {
               <p class="auth-subtitle">Welcome back!</p>
               <h2 style="margin-bottom: 5px;">Login to your Account</h2>
               <input type="text" placeholder="Username / Email" id="loginAuthInput" />
-              <input type="password" placeholder="Password" id="loginPasswordInput" />
+              <div class="password-input-wrapper">
+                <input type="password" placeholder="Password" id="loginPasswordInput" />
+                <!-- Eye icon for password visibility toggle (initially 'eye' for show) -->
+                <span class="password-toggle-icon" id="loginPasswordToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </span>
+              </div>
+              <!--
               <div class="form-options">
                 <label><input type="checkbox" id="rememberMeCheckbox" /> Remember me </label>
                 <a href="#" class="forgot-link">Forgot Password?</a>
               </div>
+              -->
               <button class="auth-btn" id="loginBtn">LOG IN</button>
               <div class="toggle-link">
                 Don't have an account? <span id="showRegister">Create an account</span>
@@ -47,8 +57,24 @@ export default class AuthPage {
               <h2 style="margin-bottom: 5px;">Create your account</h2>
               <input type="text" placeholder="Username" id="registerUsernameInput" />
               <input type="email" placeholder="Email" id="registerEmailInput" />
-              <input type="password" placeholder="Password" id="registerPasswordInput" />
-              <input type="password" placeholder="Confirm Password" id="registerConfirmPasswordInput" />
+              <div class="password-input-wrapper">
+                <input type="password" placeholder="Password" id="registerPasswordInput" />
+                <!-- Eye icon for password visibility toggle -->
+                <span class="password-toggle-icon" id="registerPasswordToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </span>
+              </div>
+              <div class="password-input-wrapper">
+                <input type="password" placeholder="Confirm Password" id="registerConfirmPasswordInput" />
+                <!-- Eye icon for password visibility toggle -->
+                <span class="password-toggle-icon" id="registerConfirmPasswordToggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </span>
+              </div>
               <label><input type="checkbox" id="registerConsentCheckbox" /> Accept terms and conditions</label>
               <button class="auth-btn" id="registerBtn">REGISTER</button>
               <div class="toggle-link">
@@ -100,9 +126,54 @@ export default class AuthPage {
       this.#presenter.handleRegister(username, email, password, confirmPassword, consent);
     });
 
+    // Attach event listeners for password visibility toggles
+    // This is crucial for making the eye icon work persistently.
+    document.getElementById('loginPasswordToggle').addEventListener('click', () => {
+        this.#togglePasswordVisibility('loginPasswordInput', 'loginPasswordToggle');
+    });
+    document.getElementById('registerPasswordToggle').addEventListener('click', () => {
+        this.#togglePasswordVisibility('registerPasswordInput', 'registerPasswordToggle');
+    });
+    document.getElementById('registerConfirmPasswordToggle').addEventListener('click', () => {
+        this.#togglePasswordVisibility('registerConfirmPasswordInput', 'registerConfirmPasswordToggle');
+    });
+
     // The navigation highlighting logic is now handled in App.js's _highlightActiveNavLink method.
     // This reduces duplication and centralizes navigation state management.
     // The previous code directly manipulating styles here is removed.
+  }
+
+  /**
+   * Toggles the visibility of a password input field and updates its associated eye icon.
+   * This method ensures the functionality works consistently every time the icon is clicked.
+   *
+   * @param {string} inputId The ID of the password input element (e.g., 'loginPasswordInput').
+   * @param {string} toggleId The ID of the span element containing the SVG toggle icon (e.g., 'loginPasswordToggle').
+   */
+  #togglePasswordVisibility(inputId, toggleId) {
+      const passwordInput = document.getElementById(inputId);
+      const toggleIconContainer = document.getElementById(toggleId);
+
+      // Check the current type of the password input
+      if (passwordInput.type === 'password') {
+          passwordInput.type = 'text'; // Change to text to show password
+          // Update the icon to represent an 'eye-off' state (password is now visible)
+          toggleIconContainer.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off">
+                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
+                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c2.5 0 4.84.93 6.56 2.5l2.24 2.24m-2.67 2.67a10.43 10.43 0 0 1-1.79 1.79l-2.74 2.74M9.88 9.88l-3.32 3.32A10.43 10.43 0 0 1 2 12c1.73-2.5 4.07-4.4 6.56-5.08L9.88 9.88Z"/>
+                  <path d="M2 2l20 20"/>
+              </svg>
+          `;
+      } else {
+          passwordInput.type = 'password'; // Change back to password to hide it
+          // Update the icon to represent an 'eye' state (password is now hidden)
+          toggleIconContainer.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+          `;
+      }
   }
 
   /**

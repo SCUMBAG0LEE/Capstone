@@ -408,6 +408,9 @@ label {
   margin-right: 0;
   margin-bottom: 5px;
 }
+
+
+
 .forgot-link {
   color: #7ea6f7;
   text-decoration: underline;
@@ -803,4 +806,97 @@ label {
   .home-subtitle {
     font-size: 250%;
   }
+}
+
+.password-toggle-icon svg {
+    display: block; /* Ensures SVG behaves correctly within inline-block */
+    width: 20px; /* Size of the icon */
+    height: 20px; /* Size of the icon */
+}
+
+/* Password Visibility Toggle Styles */
+
+.password-input-wrapper {
+    position: relative; /* Crucial for positioning the icon */
+    width: 100%; /* Ensure it takes full width of its container */
+    margin-bottom: 12px; /* Matches other input margins */
+}
+
+.password-input-wrapper input {
+    /* Adjust input padding to make space for the icon */
+    padding-right: 40px; /* Adjust if your icon is larger */
+    margin-bottom: 0; /* Remove default margin-bottom from input if wrapper has it */
+}
+
+.password-toggle-icon {
+    position: absolute;
+    right: 12px; /* Distance from the right edge of the input */
+    top: 50%;
+    transform: translateY(-50%); /* Vertically center the icon */
+    cursor: pointer;
+    color: #bfcfff; /* Color of the icon */
+    transition: color 0.2s ease-in-out;
+    z-index: 3; /* Ensure icon is above input */
+}
+
+.password-toggle-icon:hover {
+    color: #1da7e7; /* Hover effect for the icon */
+}
+
+.message-box.confirm {
+  background-color: #0C121F; /* Darker background for confirmation */
+  flex-direction: column; /* Stack message and buttons */
+  text-align: center;
+  padding-bottom: 15px; /* More padding for buttons */
+}
+
+.message-box span {
+  flex-grow: 1;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.message-box-close:hover {
+  transform: scale(1.2);
+}
+
+.confirm-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px; /* Space between message and buttons */
+  justify-content: center;
+  width: 100%; /* Ensure buttons span full width of message box */
+}
+
+.confirm-buttons button {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.2s;
+  flex: 1; /* Allow buttons to grow and take equal space */
+  max-width: 120px; /* Limit button width */
+}
+
+.confirm-yes {
+  background-color: #28a745;
+  color: #fff;
+  border: 1px solid #28a745;
+}
+
+.confirm-yes:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.confirm-no {
+  background-color: #dc3545;
+  color: #fff;
+  border: 1px solid #dc3545;
+}
+
+.confirm-no:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
 }

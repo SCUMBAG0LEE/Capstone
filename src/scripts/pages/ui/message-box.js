@@ -4,6 +4,7 @@
  */
 class MessageBox {
   static #container = null; // Static reference to the message box container
+  static #isConfirmActive = false; // Static flag to track if a confirmation box is active
 
   /**
    * Initializes the message box container if it doesn't already exist.
@@ -51,19 +52,68 @@ class MessageBox {
   }
 
   /**
+   * Displays a confirmation message to the user with Yes/No buttons.
+   * @param {string} message The text message to display.
+   * @param {string} type The type of message (e.g., 'confirm').
+   * @returns {Promise<boolean>} A promise that resolves to true if confirmed, false otherwise.
+   */
+  static showConfirm(message, type = 'confirm', timeout = 3000) {
+  return new Promise((resolve) => {
+    if (MessageBox.#isConfirmActive) {
+      resolve(false);
+      return;
+    }
+
+    MessageBox._initContainer();
+    MessageBox.#isConfirmActive = true;
+
+    const messageBox = document.createElement('div');
+    messageBox.classList.add('message-box', type, 'confirm-box');
+    messageBox.innerHTML = `<span>${message}</span><div class="confirm-buttons"><button class="confirm-yes">Yes</button><button class="confirm-no">No</button></div>`;
+    MessageBox.#container.appendChild(messageBox);
+
+
+    // Timeout to auto-dismiss if no response
+    const autoDismiss = setTimeout(() => {
+      cleanup(false);
+    }, timeout);
+
+    const cleanup = (result) => {
+  clearTimeout(autoDismiss); // Cancel timeout
+  
+  // Move this line BEFORE animation to allow new confirmations during fade-out
+  MessageBox.#isConfirmActive = false;
+
+  MessageBox._removeMessage(messageBox, () => {
+    resolve(result);
+  });
+};
+
+
+    messageBox.querySelector('.confirm-yes').addEventListener('click', () => cleanup(true));
+    messageBox.querySelector('.confirm-no').addEventListener('click', () => cleanup(false));
+  });
+}
+
+  /**
    * Removes a specific message box from the DOM with a fade-out animation.
    * @param {HTMLElement} messageBox The message box element to remove.
+   * @param {function} [callback] An optional callback function to execute after removal.
    */
-  static _removeMessage(messageBox) {
+  static _removeMessage(messageBox, callback = null) {
     if (messageBox && messageBox.parentNode === MessageBox.#container) {
-      // Add a class to trigger fade-out animation
       messageBox.style.animation = 'fadeOutSlideUp 0.4s forwards';
-      // Remove element from DOM after animation completes
       messageBox.addEventListener('animationend', () => {
         if (messageBox.parentNode) {
           messageBox.parentNode.removeChild(messageBox);
+          if (callback) {
+            callback(); // Execute callback after removal
+          }
         }
-      }, { once: true }); // Ensure the event listener runs only once
+      }, { once: true });
+    } else if (callback) {
+      // If messageBox is not in container (e.g., already removed), call callback immediately
+      callback();
     }
   }
 }

@@ -6,6 +6,7 @@ class App {
   #content = null;
   #drawerButton = null;
   #navigationDrawer = null;
+  #currentAuthLinkListener = null; // Store reference to the current auth link listener
 
   constructor({ navigationDrawer, drawerButton, content }) {
     this.#content = content;
@@ -66,26 +67,43 @@ class App {
     const predictLink = document.getElementById('predict');
     const token = localStorage.getItem('token'); // Retrieve token from local storage
 
+    // Clean up previous event listener on authLink to prevent multiple listeners
+    if (authLink && this.#currentAuthLinkListener) {
+      authLink.removeEventListener('click', this.#currentAuthLinkListener);
+      this.#currentAuthLinkListener = null;
+    }
+
     // Update Auth/Logout link
     if (authLink) {
-      // Clone and replace to remove existing event listeners before re-attaching
-      const newAuthLink = authLink.cloneNode(true);
-      authLink.parentNode.replaceChild(newAuthLink, authLink);
-
       if (token) {
-        // If logged in, change text to 'Logout' and set up logout functionality
-        newAuthLink.textContent = 'Logout';
-        newAuthLink.href = '#'; // Redirect to home after logout
-        newAuthLink.addEventListener('click', (e) => {
-          e.preventDefault(); // Prevent default link behavior
-          localStorage.removeItem('token'); // Remove the token
-          MessageBox.show('You have been logged out.', 'info'); // Show info message
-          window.location.hash = '#'; // Redirect to auth page
-        });
+        // If logged in, change text to 'Logout' and attach logout functionality
+        authLink.textContent = 'Logout';
+        authLink.href = '#'; // Prevent navigation (handled by JS)
+
+        // Define the logout event listener
+        const logoutListener = async (event) => {
+          event.preventDefault(); // Prevent default link behavior
+
+          // Show confirmation message using MessageBox
+          const confirmed = await MessageBox.showConfirm('Are you sure you want to log out?', 'confirm');
+
+          if (confirmed) {
+            localStorage.removeItem('token'); // Clear the token
+            MessageBox.show('You have been logged out.', 'info'); // Show info message
+            // Important: Re-render the page to update navigation state and remove old listener
+            window.location.hash = '#'; // Redirect to auth page and trigger renderPage
+          }
+        };
+
+        // Add the new listener and store its reference
+        authLink.addEventListener('click', logoutListener);
+        this.#currentAuthLinkListener = logoutListener;
+
       } else {
         // If not logged in, ensure text is 'Auth' and link to auth page
-        newAuthLink.textContent = 'Auth';
-        newAuthLink.href = '#/auth';
+        authLink.textContent = 'Auth';
+        authLink.href = '#/auth';
+        // For 'Auth' link, no special JS handler needed, it just navigates via href
       }
     }
 

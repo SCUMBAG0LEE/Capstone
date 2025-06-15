@@ -40,12 +40,12 @@ export default class PredictPage {
               <option value="nb">Naive Bayes (nb)</option>
             </select>
 
-            <input class="predict-input" type="number" step="0.01" placeholder="Close Price" id="closeInput" required />
-            <input class="predict-input" type="number" step="0.01" placeholder="RSI" id="rsiInput" required />
-            <input class="predict-input" type="number" step="0.01" placeholder="MACD" id="macdInput" required />
-            <input class="predict-input" type="number" step="0.01" placeholder="MACD Signal" id="macdSignalInput" required />
-            <input class="predict-input" type="number" step="0.01" placeholder="SMA 20" id="sma20Input" required />
-            <input class="predict-input" type="number" step="0.01" placeholder="EMA 20" id="ema20Input" required />
+            <input class="predict-input" type="number" step="0.01" placeholder="Close Price" id="closeInput" required title="The closing price of the stock." />
+            <input class="predict-input" type="number" step="0.01" placeholder="RSI" id="rsiInput" required title="The Relative Strength Index, a momentum indicator." />
+            <input class="predict-input" type="number" step="0.01" placeholder="MACD" id="macdInput" required title="Moving Average Convergence Divergence, a trend-following momentum indicator." />
+            <input class="predict-input" type="number" step="0.01" placeholder="MACD Signal" id="macdSignalInput" required title="The MACD signal line, a 9-period Exponential Moving Average (EMA) of the MACD line." />
+            <input class="predict-input" type="number" step="0.01" placeholder="SMA 20" id="sma20Input" required title="The 20-period Simple Moving Average of the stock's price." />
+            <input class="predict-input" type="number" step="0.01" placeholder="EMA 20" id="ema20Input" required title="The 20-period Exponential Moving Average of the stock's price." />
 
             <button class="home-btn" id="predictBtn">
               📊 Get Prediction
