@@ -75,12 +75,12 @@ class App {
       if (token) {
         // If logged in, change text to 'Logout' and set up logout functionality
         newAuthLink.textContent = 'Logout';
-        newAuthLink.href = '#/'; // Redirect to home after logout
+        newAuthLink.href = '#'; // Redirect to home after logout
         newAuthLink.addEventListener('click', (e) => {
           e.preventDefault(); // Prevent default link behavior
           localStorage.removeItem('token'); // Remove the token
           MessageBox.show('You have been logged out.', 'info'); // Show info message
-          window.location.hash = '#/auth'; // Redirect to auth page
+          window.location.hash = '#'; // Redirect to auth page
         });
       } else {
         // If not logged in, ensure text is 'Auth' and link to auth page
